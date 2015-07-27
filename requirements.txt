@@ -10,7 +10,7 @@ django-cacheops==2.3
 django-classy-tags==0.5.2
 django-compressor==1.4
 django-contrib-comments==1.5
-django-cors-headers==1.0.0
+django-cors-headers==1.1.0
 django-extensions==1.4.9
 django-guardian==1.2.5
 django-simple-history==1.5.4
@@ -33,6 +33,3 @@ django-reversion==1.8.5
 pygeocoder==1.2.5
 
 sorl-thumbnail==12.2
-
-# vlille
-#-e git+https://github.com/glibersat/python-vlille.git#egg=python-vlille
