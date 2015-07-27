@@ -304,6 +304,7 @@ class ObjectProfileLinkResource(ModelResource):
         authentication = AnonymousApiKeyAuthentication()
         authorization = DjangoAuthorization()
         default_format = "application/json"
+        allowed_methods = ['get', 'post', 'delete']
         filtering = {
             "object_id" : ['exact', ],
             "content_type" : ['exact', ],
