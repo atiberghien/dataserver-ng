@@ -42,6 +42,7 @@ class TagResource(ModelResource):
 
 class TaggedItemResource(ModelResource):
     tag = fields.ToOneField(TagResource, 'tag', full=True)
+    content_type = fields.CharField(attribute='content_type__model')
 
     class Meta:
         queryset = TaggedItem.objects.all()
@@ -52,7 +53,8 @@ class TaggedItemResource(ModelResource):
         default_format = "application/json"
         filtering = {
             "tag" : ALL_WITH_RELATIONS,
-            "object_id" : ['exact', ]
+            "object_id" : ['exact', ],
+            "content_type" : ['exact', ],
         }
         always_return_data = True
 
@@ -98,7 +100,3 @@ class TaggedItemResource(ModelResource):
                                             location=self.get_resource_uri(bundle))
 
         return ModelResource.dispatch_list(self, request, **kwargs)
-
-    def dehydrate(self, bundle):
-        bundle.data["object_type_name"] = bundle.obj.content_type.model
-        return bundle
