@@ -100,3 +100,13 @@ class TaggedItemResource(ModelResource):
                                             location=self.get_resource_uri(bundle))
 
         return ModelResource.dispatch_list(self, request, **kwargs)
+
+    def apply_filters(self, request, applicable_filters):
+        qs = self.get_object_list(request).filter(**applicable_filters)
+
+        distinct = request.GET.get('distinct', False) == 'True'
+        print 'distinct', distinct
+        if distinct:
+            qs = qs.distinct('tag__id')
+
+        return qs
