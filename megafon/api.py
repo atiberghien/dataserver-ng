@@ -21,6 +21,7 @@ class PostResource(ModelResource):
 
     tags = fields.ToManyField(TaggedItemResource, 'tagged_items', full=True, null=True)
     parent = fields.OneToOneField("megafon.api.PostResource", 'parent', null=True)
+    answers = fields.ToManyField("megafon.api.PostResource", 'answers', full=True, null=True)
 
 
     class Meta:
