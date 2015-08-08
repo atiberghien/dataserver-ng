@@ -288,6 +288,11 @@ class ProfileResource(ModelResource):
         bundle.data["username"] = bundle.obj.username
         return bundle
 
+    def alter_list_data_to_serialize(self, request, data):
+        if request.GET.get('count_only'):
+            return {'meta': data['meta'], 'objects' : []}
+        return data
+
 class ObjectProfileLinkResource(ModelResource):
     """
     Resource for linking profile with objects s.a a Project, a Category, etc.
