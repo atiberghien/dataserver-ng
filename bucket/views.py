@@ -22,6 +22,8 @@ from .forms import BucketUploadForm
 
 from .api import BucketFileResource
 
+from PIL import Image, ExifTags
+
 class JSONResponseMixin(object):
     """
     A mixin that can be used to render a JSON response.
@@ -48,10 +50,13 @@ class ThumbnailView(View):
     FIXME: THIS VIEW IS TERRIBLE: NO CACHE AND NOTHING!
     """
     preprocess_uno = ('application/vnd.oasis.opendocument.text', 'application/msword', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint')
-    
+
     def get(self, request, *args, **kwargs):
         file_id = self.kwargs['pk']
-        preview_width = self.request.GET.get('width', "150")
+        preview_width = self.request.GET.get('width', None)
+
+        preview_dim = self.request.GET.get('dim', None)
+        border = self.request.GET.get('border', False)
 
         # Lookup bucket file first
         bfile = get_object_or_404(BucketFile, pk=file_id)
@@ -64,7 +69,7 @@ class ThumbnailView(View):
         mimetype, encoding = mimetypes.guess_type(bfile.file.url)
 
         # Convert document to PDF first, if needed
-        # FIXME2: bug when several files are loaded => clashes 
+        # FIXME2: bug when several files are loaded => clashes
         if mimetype in ThumbnailView.preprocess_uno:
             target = '%s.pdf' % bfile.file.name
             if  os.path.isfile(os.path.join(settings.MEDIA_ROOT, target)):
@@ -74,9 +79,34 @@ class ThumbnailView(View):
                                                               os.path.join(settings.MEDIA_ROOT, bfile.file.name))
                 subprocess.check_output(conversion_cmd.split())
 
-        # Generate thumbnail
+        if preview_dim:
+            d = preview_dim.split('x')
+            d = (int(d[0]), int(d[1]))
+            image = Image.open(bfile.file.path)
+            if hasattr(image, '_getexif'): # only present in JPEGs
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation]=='Orientation':
+                        break
+                e = image._getexif()       # returns None if no EXIF data
+                if e is not None:
+                    exif=dict(e.items())
+                    orientation = exif[orientation]
+
+                    if orientation == 3:   image = image.transpose(Image.ROTATE_180)
+                    elif orientation == 6: image = image.transpose(Image.ROTATE_270)
+                    elif orientation == 8: image = image.transpose(Image.ROTATE_90)
+
+            thumbnail_path =  os.path.join(settings.MEDIA_ROOT, os.path.splitext(os.path.basename(bfile.file.path))[0] + '_thumb_' + preview_dim + '.jpg')
+            image.thumbnail(d, Image.ANTIALIAS)
+            if border :
+                background = Image.new('RGBA', d, (0, 0, 0, 0))
+                background.paste(image,((d[0] - image.size[0]) / 2, (d[1] - image.size[1]) / 2))
+                image = background
+            image.save(thumbnail_path, "JPEG")
+            return sendfile(request, thumbnail_path)
+
         try:
-            thumbnail = get_thumbnail(target, preview_width, quality=80, format='JPEG')
+            thumbnail = get_thumbnail(target, preview_width or preview_dim or preview_dim, quality=80, format='JPEG')
         except Exception:
             thumbnail = None
 
@@ -86,11 +116,11 @@ class ThumbnailView(View):
         else:
             fp = os.path.join(settings.STATIC_ROOT, 'images/defaultfilepreview.jpg')
         return sendfile(request, fp)
-                
+
 class UploadView(JSONResponseMixin, FormMixin, View):
     """
     A generic HTML5 Upload view
-    
+
     FIXME : deal with permissions !!
     """
     form_class = BucketUploadForm
@@ -99,7 +129,7 @@ class UploadView(JSONResponseMixin, FormMixin, View):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(UploadView, self).dispatch(*args, **kwargs)
-    
+
     def post(self, request, *args, **kwargs):
         self.api_res = BucketFileResource()
         try:
@@ -116,16 +146,16 @@ class UploadView(JSONResponseMixin, FormMixin, View):
         if form.is_valid():
             file = request.FILES[u'file']
             wrapped_file = UploadedFile(file)
-            
+
             # writing file manually into model
             # because we don't need form of any type.
-            # 
-            # check if we update a file by giving an 'id' param 
+            #
+            # check if we update a file by giving an 'id' param
             if 'id' in request.POST:
                 file_id = qdict['id']
                 self.bf = get_object_or_404(BucketFile, pk=file_id)
                 self.bf.file = file
-                self.bf.being_edited_by = None 
+                self.bf.being_edited_by = None
                 self.bf.uploaded_by = form.cleaned_data['uploaded_by'] # FIXME : security hole !! should
                 self.bf.save()
                 self.bf.thumbnail_url = reverse('bucket-thumbnail', args=[self.bf.pk])
@@ -142,17 +172,15 @@ class UploadView(JSONResponseMixin, FormMixin, View):
                 self.bf.thumbnail_url = reverse('bucket-thumbnail', args=[self.bf.pk])
                 self.bf.save()
 
-            return self.form_valid(form)            
+            return self.form_valid(form)
         else:
             return self.form_invalid(form)
 
     def form_invalid(self, form):
         return self.render_to_json_response({'error': 'error not implemented'})
-            
+
     def form_valid(self, form):
         """
         Once saved, return the object as if we were reading the API (json, ...)
         """
         return self.api_res.get_detail(self.request, pk=self.bf.pk)
-
-
