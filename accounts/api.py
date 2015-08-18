@@ -304,7 +304,7 @@ class ObjectProfileLinkResource(ModelResource):
     isValidated = fields.BooleanField(attribute='isValidated')
 
     class Meta:
-        queryset = ObjectProfileLink.objects.all()
+        queryset = ObjectProfileLink.objects.all().order_by('-created_on')
         resource_name = 'objectprofilelink'
         authentication = AnonymousApiKeyAuthentication()
         authorization = DjangoAuthorization()
@@ -319,6 +319,8 @@ class ObjectProfileLinkResource(ModelResource):
         }
         always_return_data = True
 
+
+
     def prepend_urls(self):
         return [
            url(r"^(?P<resource_name>%s)/(?P<content_type>\w+?)/(?P<object_id>\d+?)%s$" % (self._meta.resource_name, trailing_slash()),
@@ -327,7 +329,10 @@ class ObjectProfileLinkResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<content_type>\w+?)/best%s$" % (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('get_best_linked_profiles'),
                 name="api_best_linked_profiles"),
-            ]
+            url(r"^(?P<resource_name>%s)/purge%s$" % (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('purge_links'),
+                name="api_purge_links"),
+        ]
 
     def dispatch_list(self, request, **kwargs):
         self.method_check(request, allowed=['get', 'post'])
@@ -380,3 +385,14 @@ class ObjectProfileLinkResource(ModelResource):
             return self.create_response(request, {'objects' : bundles})
 
         return ModelResource.dispatch_list(self, request, **kwargs)
+
+    def purge_links(self, request, **kwargs):
+        total_cpt = 0
+        total_delete = 0
+        for link in ObjectProfileLink.objects.all():
+            if not link.content_object:
+                total_delete+=1
+                link.delete()
+            else:
+                total_cpt+=1
+        return self.create_response(request, {'total_cpt': total_cpt, 'total_delete': total_delete})
