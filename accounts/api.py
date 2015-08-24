@@ -222,6 +222,7 @@ class UserResource(ModelResource):
         password = data.get('password', '')
 
         user = authenticate(username=username, password=password)
+
         return self.login_to_apikey(request, user)
 
 
@@ -310,7 +311,7 @@ class ObjectProfileLinkResource(ModelResource):
         authentication = AnonymousApiKeyAuthentication()
         authorization = DjangoAuthorization()
         default_format = "application/json"
-        allowed_methods = ['get', 'post', 'delete']
+        allowed_methods = ['get', 'post', 'delete', 'patch']
         filtering = {
             "object_id" : ['exact', ],
             "content_type" : ['exact', ],
