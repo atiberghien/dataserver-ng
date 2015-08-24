@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.core.exceptions import SuspiciousOperation
 
 from tastypie import fields
 from tastypie import http
@@ -60,7 +61,7 @@ class UserResource(ModelResource):
             bundle.obj.set_password(bundle.data.get('password'))
             bundle.obj.save()
         except IntegrityError:
-            raise BadRequest('That username already exists')
+            raise SuspiciousOperation('That username already exists')
         return bundle
 
     def prepend_urls(self):
