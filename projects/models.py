@@ -66,6 +66,14 @@ class Project(models.Model):
         """ pep257, you know I love you. """
         return self.title
 
+class ProjectNews(models.Model):
+    """ Basic news about a projet """
+
+    title = models.CharField(max_length=100)
+    text = models.TextField(blank=True)
+    author = models.ForeignKey(Profile)
+    project = models.ForeignKey(Project)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 # XXX/TODO: obsolete
 class ProjectTeam(models.Model):

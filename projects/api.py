@@ -1,14 +1,16 @@
 from tastypie.resources import ModelResource
 from tastypie import fields
 
-from .models import Project, ProjectProgressRange, ProjectProgress
+from .models import Project, ProjectProgressRange, ProjectProgress, ProjectNews
 
+from accounts.api import ProfileResource
 from base.api import HistorizedModelResource
 from graffiti.api import TaggedItemResource
 from scout.api import PlaceResource
 from dataserver.authentication import AnonymousApiKeyAuthentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS
+
 
 # from accounts.api import ProfileResource
 
@@ -66,3 +68,14 @@ class ProjectResource(HistorizedModelResource):
             'id': ('exact', ),
             'location': ALL_WITH_RELATIONS,
         }
+
+class ProjectNewsResource(ModelResource):
+    author = fields.ToOneField(ProfileResource, 'author', full=True)
+
+    class Meta:
+        queryset = ProjectNews.objects.all().order_by('-timestamp')
+        allowed_methods = ['get']
+        resource_name = 'project/news'
+        always_return_data = True
+        authentication = AnonymousApiKeyAuthentication()
+        authorization = DjangoAuthorization()
