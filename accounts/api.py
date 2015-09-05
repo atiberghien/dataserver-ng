@@ -49,8 +49,11 @@ class UserResource(ModelResource):
 
     def dehydrate(self, bundle):
         try:
-            bundle.data['mugshot'] = bundle.obj.profile.mugshot
-        except Profile.DoesNotExist:
+            bundle.data['profile'] = {
+                'avatar' : bundle.obj.profile.mugshot.url,
+                'id' : bundle.obj.profile.id
+            }
+        except:
             pass
         bundle.data['groups'] = [{"id" : group.id, "name":group.name} for group in bundle.obj.groups.all()]
         return bundle
@@ -274,6 +277,7 @@ models.signals.post_save.connect(create_api_key, sender=User)
 
 class ProfileResource(ModelResource):
     user = fields.OneToOneField(UserResource, 'user', full=True)
+    avatar = fields.FileField(attribute="mugshot", null=True, blank=True)
 
     class Meta:
         queryset = Profile.objects.all()
