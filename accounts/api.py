@@ -31,6 +31,7 @@ from urlparse import parse_qs, parse_qsl
 from urllib import urlencode
 from django.http import HttpResponse,HttpResponseRedirect
 
+from django.core.mail import send_mail
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.exclude(pk=-1) # Exclude anonymous user
@@ -84,7 +85,43 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/logout%s$' %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('logout'), name='api_logout'),
+            url(r'^(?P<resource_name>%s)/(?P<user_id>\d+)/send/message%s$' %
+                (self._meta.resource_name, trailing_slash()),
+                self.wrap_view('send_message'), name='api_send_message'),
         ]
+
+    def send_message(self, request, **kwargs):
+        """
+        Send a message to user after checking captcha with google service
+        """
+        self.method_check(request, allowed=['post'])
+        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
+
+        try:
+            recipient = User.objects.get(id=kwargs["user_id"])
+        except User.DoesNotExist:
+            return self.create_response(request, {'success': False})
+
+
+        payload = dict(secret=settings.GOOGLE_RECAPTCHA_SECRET,
+                       response=data['recaptcha_response'])
+
+        r = requests.post("https://www.google.com/recaptcha/api/siteverify", data=payload)
+        resp = json.loads(r.text)
+        if resp["success"] :
+            try:
+                send_mail('Message Makerscience de %s' % data["sender_full_name"],
+                        data["body"],
+                        data["sender_email"],
+                        [recipient.email],
+                        fail_silently=False)
+            except:
+                return self.create_response(request, {'success': False})
+            return self.create_response(request, {'success': True})
+        else:
+            return self.create_response(request, {'success': False})
+
+
 
     def login_google(self, request, **kwargs):
         """
