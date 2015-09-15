@@ -159,7 +159,7 @@ class UserResource(ModelResource):
         else:
             return self.create_response(request, {'success': False,
                                                 'reason': 'google auth rejected',
-                                                'google_message' : r.text
+                                                'google_message' : r.text,
                                                 'skip_login_redir': True, }, HttpUnauthorized)
         return self.login_to_apikey(request, user)
 
@@ -200,7 +200,7 @@ class UserResource(ModelResource):
         else:
             return self.create_response(request, {'success': False,
                                                 'reason': 'faceboot auth rejected',
-                                                'facebook_message' : r.text
+                                                'facebook_message' : r.text,
                                                 'skip_login_redir': True, }, HttpUnauthorized)
         return self.login_to_apikey(request, user)
 
