@@ -156,7 +156,11 @@ class UserResource(ModelResource):
                                                            email=data['email'],
                                                            first_name=data['given_name'],
                                                            last_name=data['family_name'])
-
+        else:
+            return self.create_response(request, {'success': False,
+                                                'reason': 'google auth rejected',
+                                                'google_message' : r.text
+                                                'skip_login_redir': True, }, HttpUnauthorized)
         return self.login_to_apikey(request, user)
 
     def login_facebook(self, request, **kwargs):
@@ -193,7 +197,11 @@ class UserResource(ModelResource):
                                                        email=data['email'],
                                                        first_name=data['first_name'],
                                                        last_name=data['last_name'])
-
+        else:
+            return self.create_response(request, {'success': False,
+                                                'reason': 'faceboot auth rejected',
+                                                'facebook_message' : r.text
+                                                'skip_login_redir': True, }, HttpUnauthorized)
         return self.login_to_apikey(request, user)
 
     def login_twitter(self, request, **kwargs):
