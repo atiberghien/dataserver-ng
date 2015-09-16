@@ -42,7 +42,7 @@ class ObjectProfileLink(models.Model):
 
 @receiver(post_save, sender=User)
 def create_profile_on_user_signup(sender, created, instance, **kwargs):
-    if created and not instance.is_superuser and not instance.id not in [-1, None]:
+    if created and not instance.is_superuser and instance.id != settings.ANONYMOUS_USER_ID:
         profile_model = get_profile_model()
         profile_model.objects.create(user=instance)
 
