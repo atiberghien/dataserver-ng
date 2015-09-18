@@ -90,12 +90,14 @@ class ThumbnailView(View):
                 e = image._getexif()       # returns None if no EXIF data
                 if e is not None:
                     exif=dict(e.items())
-                    orientation = exif[orientation]
+                    try:
+                        orientation = exif[orientation]
 
-                    if orientation == 3:   image = image.transpose(Image.ROTATE_180)
-                    elif orientation == 6: image = image.transpose(Image.ROTATE_270)
-                    elif orientation == 8: image = image.transpose(Image.ROTATE_90)
-
+                        if orientation == 3:   image = image.transpose(Image.ROTATE_180)
+                        elif orientation == 6: image = image.transpose(Image.ROTATE_270)
+                        elif orientation == 8: image = image.transpose(Image.ROTATE_90)
+                    except:
+                        pass
             thumbnail_path =  os.path.join(settings.MEDIA_ROOT, os.path.splitext(os.path.basename(bfile.file.path))[0] + '_thumb_' + preview_dim + '.jpg')
             image.thumbnail(d, Image.ANTIALIAS)
             if border :
