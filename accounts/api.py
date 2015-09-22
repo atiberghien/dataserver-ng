@@ -36,7 +36,7 @@ class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.exclude(pk=-1) # Exclude anonymous user
         detail_uri_name = 'username'
-        allowed_methods = ['get', 'post']
+        allowed_methods = ['get', 'post', 'patch']
         resource_name = 'account/user'
         authentication = Authentication()
         authorization = Authorization()
