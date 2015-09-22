@@ -46,7 +46,7 @@ class UserResource(ModelResource):
             "username": ALL_WITH_RELATIONS,
         }
 
-    groups = fields.ToManyField('accounts.api.GroupResource', 'groups', null=True, full=False)
+    # groups = fields.ToManyField('accounts.api.GroupResource', 'groups', null=True, full=False)
 
     def dehydrate(self, bundle):
         try:
@@ -54,9 +54,9 @@ class UserResource(ModelResource):
                 'avatar' : bundle.obj.profile.mugshot.url,
                 'id' : bundle.obj.profile.id
             }
+            bundle.data['groups'] = [{"id" : group.id, "name":group.name} for group in bundle.obj.groups.all()]
         except:
             pass
-        bundle.data['groups'] = [{"id" : group.id, "name":group.name} for group in bundle.obj.groups.all()]
         return bundle
 
     def obj_create(self, bundle, request=None, **kwargs):
