@@ -314,7 +314,7 @@ class GroupResource(ModelResource):
         authentication = Authentication()
         authorization = Authorization()
 
-    users = fields.ToManyField(UserResource, 'user_set', full=True)
+    users = fields.ToManyField(UserResource, 'user_set', full=True, null=True)
 
 
 # Create API key for every new user
