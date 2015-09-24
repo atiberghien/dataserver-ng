@@ -32,6 +32,7 @@ from urllib import urlencode
 from django.http import HttpResponse,HttpResponseRedirect
 
 from django.core.mail import send_mail
+import hashlib
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.exclude(pk=-1) # Exclude anonymous user
@@ -166,7 +167,7 @@ class UserResource(ModelResource):
         if r.status_code == 200:
             data = json.loads(r.text)
             if data['email_verified']:
-                user, created = User.objects.get_or_create(username=data['email'],
+                user, created = User.objects.get_or_create(username=hashlib.sha1(data['email']).hexdigest()[:30],
                                                            email=data['email'],
                                                            first_name=data['given_name'],
                                                            last_name=data['family_name'])
@@ -207,7 +208,7 @@ class UserResource(ModelResource):
         user = None
         if r.status_code == 200:
             data = json.loads(r.text)
-            user, created = User.objects.get_or_create(username=data['email'],
+            user, created = User.objects.get_or_create(username=hashlib.sha1(data['email']).hexdigest()[:30],
                                                        email=data['email'],
                                                        first_name=data['first_name'],
                                                        last_name=data['last_name'])
