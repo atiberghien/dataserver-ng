@@ -45,6 +45,7 @@ class UserResource(ModelResource):
         filtering = {
             "id" : ['exact',],
             "username": ALL_WITH_RELATIONS,
+            "email" : ['exact',],
         }
 
     # groups = fields.ToManyField('accounts.api.GroupResource', 'groups', null=True, full=False)
