@@ -87,9 +87,6 @@ class UserResource(ModelResource):
             url(r'^(?P<resource_name>%s)/logout%s$' %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('logout'), name='api_logout'),
-            url(r'^(?P<resource_name>%s)/(?P<user_id>\d+)/send/message%s$' %
-                (self._meta.resource_name, trailing_slash()),
-                self.wrap_view('send_message'), name='api_send_message'),
             url(r'^(?P<resource_name>%s)/report/abuse%s$' %
                 (self._meta.resource_name, trailing_slash()),
                 self.wrap_view('report_abuse'), name='api_report_abuse'),
@@ -114,19 +111,6 @@ class UserResource(ModelResource):
         else:
             return self.create_response(request, {'success': False})
 
-    def send_message(self, request, **kwargs):
-        """
-        Send a message to user after checking captcha with google service
-        """
-        self.method_check(request, allowed=['post'])
-        data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
-
-        try:
-            recipients = [User.objects.get(id=kwargs["user_id"]).values_list('email', flat=True)]
-        except User.DoesNotExist:
-            return self.create_response(request, {'success': False})
-
-        return self.send_email(request, data, recipients)
 
     def report_abuse(self, request, **kwargs):
         """
