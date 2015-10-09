@@ -271,10 +271,10 @@ class UserResource(ModelResource):
 
         user = authenticate(username=username, password=password)
 
-        return self.login_to_apikey(request, user)
+        return self.login_to_apikey(request, user, basic_login=True)
 
 
-    def login_to_apikey(self, request, user):
+    def login_to_apikey(self, request, user, basic_login=False):
         if user:
             if user.is_active:
                 # login(request, user)
@@ -295,6 +295,9 @@ class UserResource(ModelResource):
             else:
                 return self.create_response({'success': False, 'reason': 'disabled',}, HttpForbidden)
         else:
+            if basic_login:
+                return self.create_response(request, {'success': False})
+
             return self.create_response(
                 request, {'success': False, 'reason': 'invalid login', 'skip_login_redir': True, }, HttpUnauthorized)
 
