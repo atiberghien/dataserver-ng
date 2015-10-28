@@ -428,12 +428,13 @@ class ObjectProfileLinkResource(ModelResource):
 
             profiles = Profile.objects.filter(id__gt=1,
                         objectprofilelink__content_type__model=kwargs["content_type"],
-                        objectprofilelink__level__in=levels).annotate(num_post=Count('objectprofilelink')).order_by('-num_post')
+                        objectprofilelink__level__in=levels).annotate(score=Count('objectprofilelink')).order_by('-score')
 
             bundles = []
             for obj in profiles:
                 profile_resource = ProfileResource()
                 bundle = profile_resource.build_bundle(obj=obj, request=request)
+                bundle.data["score"] = obj.score
                 bundles.append(profile_resource.full_dehydrate(bundle, for_list=True))
 
             return self.create_response(request, {'objects' : bundles})
