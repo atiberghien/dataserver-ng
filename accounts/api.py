@@ -369,6 +369,7 @@ class ObjectProfileLinkResource(ModelResource):
             "content_type" : ['exact', ],
             "level" : ['exact', ],
             "profile" : ALL_WITH_RELATIONS,
+            "isValidated" : ['exact', ]
 
         }
         always_return_data = True
