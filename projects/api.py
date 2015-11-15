@@ -74,7 +74,7 @@ class ProjectNewsResource(ModelResource):
 
     class Meta:
         queryset = ProjectNews.objects.all().order_by('-timestamp')
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'delete']
         resource_name = 'project/news'
         always_return_data = True
         authentication = AnonymousApiKeyAuthentication()
