@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import pre_save  # , post_save
+from django.db.models.signals import pre_save , post_delete
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 
@@ -65,12 +65,14 @@ class ProjectSheet(models.Model):
 
 def createProjectSheetBucket(sender, instance, **kwargs):
     bucket_name = instance.project.slug
-    # FIXME : to whom should bucket projects belong ?
-    #         default to Anonymous user by now.
     bucket_owner = User.objects.get(pk=-1)
-    projectsheet_bucket, created = Bucket.objects.get_or_create(
-        created_by=bucket_owner, name=bucket_name)
+    projectsheet_bucket, created = Bucket.objects.get_or_create(created_by=bucket_owner, name=bucket_name)
     instance.bucket = projectsheet_bucket
+
+def clearProjectSheetBucket(sender, instance, **kwargs):
+    bucket_name = instance.project.slug
+    bucket_owner = User.objects.get(pk=-1)
+    Bucket.objects.get(created_by=bucket_owner, name=bucket_name).delete()
 
 class ProjectSheetQuestionAnswer(models.Model):
 
@@ -91,3 +93,4 @@ class ProjectSheetQuestionAnswer(models.Model):
 
 
 pre_save.connect(createProjectSheetBucket, ProjectSheet)
+post_delete.connect(clearProjectSheetBucket, ProjectSheet)

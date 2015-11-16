@@ -54,7 +54,7 @@ class ThumbnailView(View):
     def get(self, request, *args, **kwargs):
         file_id = self.kwargs['pk']
         preview_width = self.request.GET.get('width', None)
-
+        preview_height = self.request.GET.get('height', None)
         preview_dim = self.request.GET.get('dim', None)
         border = self.request.GET.get('border', False)
 
@@ -65,6 +65,7 @@ class ThumbnailView(View):
         if bfile.file.name[0:6] == "/media":
             bfile.file.name = bfile.file.name[7:]
         target = bfile.file.name
+
         # Guess mimetype
         mimetype, encoding = mimetypes.guess_type(bfile.file.url)
 
@@ -108,7 +109,7 @@ class ThumbnailView(View):
             return sendfile(request, thumbnail_path)
 
         try:
-            thumbnail = get_thumbnail(target, preview_width or preview_dim or preview_dim, quality=80, format='JPEG')
+            thumbnail = get_thumbnail(target, preview_width or preview_height, quality=80, format='JPEG')
         except Exception:
             thumbnail = None
 

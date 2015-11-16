@@ -5,7 +5,7 @@ from hashlib import sha1
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils.text import get_valid_filename
 from django.utils.translation import ugettext as _
@@ -89,3 +89,12 @@ def allow_user_to_edit_buckets(sender, instance, created, *args, **kwargs):
 def allow_user_to_create_bucket_via_api(sender, instance, created, *args, **kwargs):
     if created:
         assign_perm("bucket.add_bucket", instance)
+
+@receiver(pre_delete, sender=BucketFile)
+def clear_file(sender, instance, **kwargs):
+    media_root = getattr(settings, 'MEDIA_ROOT')
+    basename = os.path.splitext(os.path.basename(instance.file.name))[0]
+    for i in os.listdir(media_root):
+        if os.path.isfile(os.path.join(media_root, i)) and basename in i:
+            os.remove(os.path.join(media_root, i))
+    instance.file.delete(False)
