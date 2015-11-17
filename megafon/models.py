@@ -33,6 +33,9 @@ class Post(MPTTModel):
     class MPTTMeta:
         order_insertion_by = ['posted_on']
 
+    def __unicode__(self):
+        return self.title
+
 
 def update_answers_count(sender, instance, created, **kwargs):
     if not instance.is_root_node():
