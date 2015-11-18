@@ -24,6 +24,9 @@ class Profile(UserenaBaseProfile):
     def username(self):
         return self.user.username
 
+    def __unicode__(self) :
+            return "%s (%s)" % (self.get_full_name_or_username(), self.user.email)
+
 class ObjectProfileLink(models.Model):
     """
     Generic class to record a link between a user profile and an object (Project e.g.)
