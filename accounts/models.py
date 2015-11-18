@@ -62,10 +62,3 @@ def assign_to_authenticated_users_group(sender, instance, created, *args, **kwar
         assign_perm(permission, group)
     # assign user to group
     instance.groups.add(group)
-
-@receiver(post_save, sender=ObjectProfileLink)
-def clear_object_profile_link(sender, created, instance, **kwargs):
-    #in some obscure cases, content_object become None and crash
-    for o in ObjectProfileLink.objects.all():
-        if o.content_object == None:
-            o.delete()
