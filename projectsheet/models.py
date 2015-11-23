@@ -63,17 +63,6 @@ class ProjectSheet(models.Model):
         return u"%s %s" % (_('Project sheet for '), self.project)
 
 
-def createProjectSheetBucket(sender, instance, **kwargs):
-    bucket_name = instance.project.slug
-    bucket_owner = User.objects.get(pk=-1)
-    projectsheet_bucket, created = Bucket.objects.get_or_create(created_by=bucket_owner, name=bucket_name)
-    instance.bucket = projectsheet_bucket
-
-def clearProjectSheetBucket(sender, instance, **kwargs):
-    bucket_name = instance.project.slug
-    bucket_owner = User.objects.get(pk=-1)
-    Bucket.objects.get(created_by=bucket_owner, name=bucket_name).delete()
-
 class ProjectSheetQuestionAnswer(models.Model):
 
     """ Answer to a question for a given project. """
@@ -90,7 +79,3 @@ class ProjectSheetQuestionAnswer(models.Model):
 
     def __unicode__(self):
         return u"Answer to question <%s> for <%s>" % (self.question, self.projectsheet)
-
-
-pre_save.connect(createProjectSheetBucket, ProjectSheet)
-post_delete.connect(clearProjectSheetBucket, ProjectSheet)
