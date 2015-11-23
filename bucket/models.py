@@ -90,11 +90,11 @@ def allow_user_to_create_bucket_via_api(sender, instance, created, *args, **kwar
     if created:
         assign_perm("bucket.add_bucket", instance)
 
-@receiver(pre_delete, sender=BucketFile)
-def clear_file(sender, instance, **kwargs):
-    media_root = getattr(settings, 'MEDIA_ROOT')
-    basename = os.path.splitext(os.path.basename(instance.file.name))[0]
-    for i in os.listdir(media_root):
-        if os.path.isfile(os.path.join(media_root, i)) and basename in i:
-            os.remove(os.path.join(media_root, i))
-    instance.file.delete(False)
+# @receiver(pre_delete, sender=BucketFile)
+# def clear_file(sender, instance, **kwargs):
+#     media_root = getattr(settings, 'MEDIA_ROOT')
+#     basename = os.path.splitext(os.path.basename(instance.file.name))[0]
+#     for i in os.listdir(media_root):
+#         if os.path.isfile(os.path.join(media_root, i)) and basename in i:
+#             os.remove(os.path.join(media_root, i))
+#     instance.file.delete(False)
