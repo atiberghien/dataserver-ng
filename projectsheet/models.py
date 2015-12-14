@@ -64,7 +64,7 @@ class ProjectSheet(models.Model):
 
 def createProjectSheetBucket(sender, instance, **kwargs):
     if instance.bucket == None:
-        print "youpi"
+        print "Created bucket for %s" % instance.project.slug
         bucket_name = instance.project.slug
         bucket_owner = User.objects.get(pk=-1)
         projectsheet_bucket, created = Bucket.objects.get_or_create(created_by=bucket_owner, name=bucket_name)
