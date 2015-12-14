@@ -62,6 +62,15 @@ class ProjectSheet(models.Model):
     def __unicode__(self):
         return u"%s %s" % (_('Project sheet for '), self.project)
 
+def createProjectSheetBucket(sender, instance, **kwargs):
+    if instance.bucket == None:
+        print "youpi"
+        bucket_name = instance.project.slug
+        bucket_owner = User.objects.get(pk=-1)
+        projectsheet_bucket, created = Bucket.objects.get_or_create(created_by=bucket_owner, name=bucket_name)
+        instance.bucket = projectsheet_bucket
+
+pre_save.connect(createProjectSheetBucket, ProjectSheet)
 
 class ProjectSheetQuestionAnswer(models.Model):
 
