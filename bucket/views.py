@@ -83,7 +83,10 @@ class ThumbnailView(View):
         if preview_dim:
             d = preview_dim.split('x')
             d = (int(d[0]), int(d[1]))
-            image = Image.open(bfile.file.path)
+            try:
+                image = Image.open(bfile.file.path)
+            except IOError:
+                image = Image.new("RGB", (int(preview_dim.split("x")[0]), int(preview_dim.split("x")[1])), "black")
             if hasattr(image, '_getexif'): # only present in JPEGs
                 for orientation in ExifTags.TAGS.keys():
                     if ExifTags.TAGS[orientation]=='Orientation':
