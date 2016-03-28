@@ -36,7 +36,7 @@ class ObjectProfileLink(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.TextField(_('object_id'))
     content_object = generic.GenericForeignKey('content_type', 'object_id', _("Linked object"))
-    profile = models.ForeignKey(Profile, verbose_name = _("Linked user profile"))
+    profile = models.ForeignKey(Profile, verbose_name = _("Linked user profile"), null=True, blank=True, on_delete=models.SET_NULL)
     level = models.IntegerField(_("Implication level of the link"))
     detail = models.CharField(max_length=200, blank=True)
     isValidated = models.BooleanField(default=False)
