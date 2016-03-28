@@ -3,6 +3,7 @@ import os
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
+from django.contrib.gis.geos import GEOSGeometry
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.utils.translation import ugettext as _
@@ -10,8 +11,10 @@ from django.utils.translation import ugettext as _
 from autoslug import AutoSlugField
 from guardian.shortcuts import assign_perm
 from jsonfield import JSONField
+from geopy.geocoders import Nominatim
 
 from bucket.models import Bucket
+
 
 ## Transitional schema for a postal address
 class PostalAddress(models.Model):
@@ -205,3 +208,17 @@ def allow_user_to_edit_maps(sender, instance, created, *args, **kwargs):
 def allow_user_to_create_map_via_api(sender, instance, created, *args, **kwargs):
     if created:
         assign_perm("scout.add_map", instance)
+
+@receiver(post_save, sender=PostalAddress)
+def geocode_postal_address(sender, instance, created, *args, **kwargs):
+    place, place_created = Place.objects.get_or_create(address=instance)
+    if instance.address_locality:
+        geolocator = Nominatim()
+        location = geolocator.geocode(instance.address_locality)
+        if location:
+            pnt = GEOSGeometry('POINT(%s %s)' % (location.longitude, location.latitude))
+            try:
+                place.geo = pnt
+                place.save()
+            except:
+                print "No place", location.address
