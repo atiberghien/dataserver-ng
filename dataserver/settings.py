@@ -152,25 +152,14 @@ INSTALLED_APPS = (
     'haystack',
     # 'cacheops',
 
-    # Dataserver
-    # WARNING: order matters:
-    # notably scout → projects → commons (for migrations)
-    #
-    # 'alambic',
-
     'accounts',
     'bucket',
-    # 'deal',
     'flipflop',
     'graffiti',
     'scout',
     'projects',
     'projectsheet',
-    'projecttool',
     'graffiti',
-    'commons',
-    'transport_vlille',
-    'unisson',
 
     'simple_history',
 
