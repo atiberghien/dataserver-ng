@@ -51,9 +51,6 @@ class ProjectResource(HistorizedModelResource):
     progress = fields.ToOneField(ProjectProgressResource, 'progress',
                                  null=True, blank=True, full=True)
     tags = fields.ToManyField(TaggedItemResource, 'tagged_items', full=True, null=True)
-    # TODO: 20150302 keep ?
-    # tags = fields.ToManyField('graffiti.api.TagResource', 'tags',
-    #                           full=True, null=True)
 
     class Meta:
         queryset = Project.objects.all()
