@@ -67,8 +67,9 @@ class ProjectResource(HistorizedModelResource):
         }
 
     def hydrate_website(self, bundle):
-        if bundle.data["website"] and (bundle.data["website"].startswith("http://") == False ^ bundle.data["website"].startswith("https://") == False):
-            bundle.data["website"] = "http://" + bundle.data["website"]
+        if "website" in bundle.data and bundle.data["website"]:
+            if bundle.data["website"].startswith("http://") == False ^ bundle.data["website"].startswith("https://") == False:
+                bundle.data["website"] = "http://" + bundle.data["website"]
         return bundle
 
 class ProjectNewsResource(ModelResource):
