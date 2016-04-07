@@ -1,6 +1,7 @@
 import os
 
 from django.dispatch import receiver
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import GEOSGeometry
@@ -11,7 +12,7 @@ from django.utils.translation import ugettext as _
 from autoslug import AutoSlugField
 from guardian.shortcuts import assign_perm
 from jsonfield import JSONField
-from geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim, GoogleV3
 
 from bucket.models import Bucket
 
@@ -213,8 +214,8 @@ def allow_user_to_create_map_via_api(sender, instance, created, *args, **kwargs)
 def geocode_postal_address(sender, instance, created, *args, **kwargs):
     place, place_created = Place.objects.get_or_create(address=instance)
     if instance.address_locality:
-        geolocator = Nominatim()
-        location = geolocator.geocode(instance.address_locality)
+        geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY)
+	location = geolocator.geocode(instance.address_locality)
         if location:
             pnt = GEOSGeometry('POINT(%s %s)' % (location.longitude, location.latitude))
             try:
