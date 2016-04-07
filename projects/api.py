@@ -66,6 +66,11 @@ class ProjectResource(HistorizedModelResource):
             'location': ALL_WITH_RELATIONS,
         }
 
+    def hydrate_website(self, bundle):
+        if bundle.data["website"] and (bundle.data["website"].startswith("http://") == False ^ bundle.data["website"].startswith("https://") == False):
+            bundle.data["website"] = "http://" + bundle.data["website"]
+        return bundle
+
 class ProjectNewsResource(ModelResource):
     author = fields.ToOneField(ProfileResource, 'author', full=True)
 
