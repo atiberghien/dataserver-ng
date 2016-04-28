@@ -212,14 +212,20 @@ def allow_user_to_create_map_via_api(sender, instance, created, *args, **kwargs)
 
 @receiver(post_save, sender=PostalAddress)
 def geocode_postal_address(sender, instance, created, *args, **kwargs):
-    place, place_created = Place.objects.get_or_create(address=instance)
+    places = Place.objects.filter(address=instance)
+    if places.count() > 0:
+        place = places[0]
+        for p in places.exclude(id=place.id):
+            p.delete()
+    else:
+        place, place_created = Place.objects.get_or_create(address=instance)
+
     if instance.address_locality:
-        geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY)
-	location = geolocator.geocode(instance.address_locality)
-        if location:
+        try:
+            geolocator = GoogleV3(api_key=settings.GOOGLE_API_KEY)
+            location = geolocator.geocode(instance.address_locality)
             pnt = GEOSGeometry('POINT(%s %s)' % (location.longitude, location.latitude))
-            try:
-                place.geo = pnt
-                place.save()
-            except:
-                print "No place", location.address
+            place.geo = pnt
+            place.save()
+        except:
+            pass
