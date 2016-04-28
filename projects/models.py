@@ -47,7 +47,9 @@ class Project(models.Model):
     """ A project is any idea you can document. """
 
     title = models.CharField(max_length=100)
-    slug = AutoSlugField(unique=True)
+    slug = AutoSlugField(unique=True,
+                         populate_from='title',
+                         unique_with=['title'])
     baseline = models.CharField(max_length=250, null=True, blank=True)
     tags = TaggableManager(blank=True)
     description = models.TextField(blank=True)
