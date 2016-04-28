@@ -36,6 +36,7 @@ class CommentResource(ModelResource):
     comment = fields.CharField(attribute='comment')
     user = fields.ToOneField(UserResource, 'user', full='true')
     flags = fields.ToManyField(CommentFlagResource, 'flags', full='false', null='true')
+    content_type = fields.CharField(attribute='content_type__model')
     class Meta:
         queryset = Comment.objects.all()
         resource_name = 'comment'
