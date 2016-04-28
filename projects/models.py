@@ -55,8 +55,12 @@ class Project(models.Model):
     description = models.TextField(blank=True)
     location = models.ForeignKey(Place, null=True, blank=True, on_delete=models.SET_NULL)
     website = models.URLField(null=True, blank=True)
-    begin_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+
+    # begin_date = models.DateField(null=True, blank=True)
+    # end_date = models.DateField(null=True, blank=True)
+    begin_date = models.CharField(max_length=250, null=True, blank=True)
+    end_date = models.CharField(max_length=250, null=True, blank=True)
+
     progress = models.ForeignKey(ProjectProgress, null=True, blank=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(auto_now_add=True)
 
