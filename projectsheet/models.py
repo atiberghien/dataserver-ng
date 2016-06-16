@@ -56,6 +56,7 @@ class ProjectSheet(models.Model):
     bucket = models.ForeignKey(Bucket, null=True, blank=True, on_delete=models.SET_NULL)
     cover = models.ForeignKey(BucketFile, null=True, blank=True, related_name="project_sheets_covered", on_delete=models.SET_NULL)
     videos = JSONField(default=None, blank=True, null=True)
+    medias = JSONField(default=None, blank=True, null=True)
 
     history = HistoricalRecords()
 

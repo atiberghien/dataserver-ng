@@ -88,6 +88,7 @@ class ProjectSheetResource(HistorizedModelResource):
                                           'question_answers', null=True,
                                           full=True)
     videos = fields.DictField(attribute='videos', null=True)
+    medias = fields.DictField(attribute='medias', null=True)
 
     class Meta:
         object_class = ProjectSheet
