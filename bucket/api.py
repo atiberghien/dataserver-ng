@@ -19,7 +19,7 @@ from tastypie import fields
 from dataserver.authorization import GuardianAuthorization
 from dataserver.authentication import AnonymousApiKeyAuthentication
 
-from .models import Bucket, BucketFile, BucketFileComment
+from .models import Bucket, BucketFile, BucketFileComment, Experience
 
 class BucketResource(ModelResource):
     class Meta:
@@ -31,9 +31,9 @@ class BucketResource(ModelResource):
             delete_permission_code="delete_bucket"
         )
         resource_name = 'bucket/bucket'
-        always_return_data = True        
+        always_return_data = True
         queryset = Bucket.objects.all()
- 
+
     files = fields.ToManyField('bucket.api.BucketFileResource', 'files', full=True, null=True)
 
     def obj_create(self, bundle, **kwargs):
@@ -48,7 +48,7 @@ class BucketResource(ModelResource):
         URL override for when a user wants to share a bucket with a group (assign a bucket to a group)
         """
         return [
-           url(r"^(?P<resource_name>%s)/(?P<bucket_id>\d+)/assign%s$" % 
+           url(r"^(?P<resource_name>%s)/(?P<bucket_id>\d+)/assign%s$" %
                 (self._meta.resource_name, trailing_slash()),
                  self.wrap_view('bucket_assign'), name="api_bucket_assign"),
         ]
@@ -56,33 +56,33 @@ class BucketResource(ModelResource):
     def bucket_assign(self, request, **kwargs):
         """
         Method to assign edit permissions for a bucket 'bucket_id' to
-        a group passed as POST parameter 'group_id' 
+        a group passed as POST parameter 'group_id'
         """
         self.method_check(request, allowed=['post'])
         self.throttle_check(request)
         self.is_authenticated(request)
-       
+
         target_group_id = json.loads(request.body)['group_id']
         target_group = get_object_or_404(Group, pk=target_group_id)
-        bucket_id = kwargs['bucket_id'] 
+        bucket_id = kwargs['bucket_id']
         bucket = get_object_or_404(Bucket, pk=bucket_id)
         # assign bucket to group
         assign_perm("view_bucket", user_or_group=target_group, obj=bucket)
         assign_perm("change_bucket", user_or_group=target_group, obj=bucket)
         return self.create_response(request, {'success': True})
 
-        
+
 class BucketTagResource(ModelResource):
     class Meta:
         queryset = Tag.objects.all()
-        resource_name = 'bucket/tag' 
+        resource_name = 'bucket/tag'
         filtering = {
             "name":"exact",
         }
         allowed_methods = ['get', 'post', 'patch']
         authentication = AnonymousApiKeyAuthentication()
-        authorization = DjangoAuthorization()  
-    
+        authorization = DjangoAuthorization()
+
     def hydrate(self, bundle, request=None):
         """
         We allow sending dumb tag objects with only a "name" attribute, then we retrieve or create proper tag objects
@@ -96,7 +96,22 @@ class BucketTagResource(ModelResource):
                 tag.save()
             bundle = self.build_bundle(obj=tag)
         return bundle
-        
+
+class BucketExperienceResource(ModelResource):
+    """
+    Rest Resource for a given file of a given bucket
+    """
+    class Meta:
+        queryset = Experience.objects.all()
+        resource_name = 'bucket/experience'
+        authentication = AnonymousApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+
+    date = fields.CharField(attribute='date', null=True)
+    difficulties = fields.CharField(attribute='difficulties', null=True)
+    presentation = fields.CharField(attribute='presentation', null=True)
+    success = fields.CharField(attribute='success', null=True)
+
 class BucketFileResource(ModelResource):
     """
     Rest Resource for a given file of a given bucket
@@ -105,45 +120,46 @@ class BucketFileResource(ModelResource):
         queryset = BucketFile.objects.all()
         resource_name = 'bucket/file'
         filtering = {
-            "bucket":'exact', 
+            "bucket":'exact',
         }
 
         authentication = AnonymousApiKeyAuthentication()
-        authorization = DjangoAuthorization()        
-    
+        authorization = DjangoAuthorization()
+
     comments = fields.ToManyField('bucket.api.BucketFileCommentResource', 'comments', full=True)
-    tags = fields.ToManyField(BucketTagResource, 'tags', full=True)    
+    tags = fields.ToManyField(BucketTagResource, 'tags', full=True)
     bucket = fields.ToOneField(BucketResource, 'bucket', null=True)
     uploaded_by = fields.ToOneField(UserResource, 'uploaded_by', full=True)
     file = fields.FileField(attribute='file')
     filename = fields.CharField(attribute='filename', null=True)
-    being_edited_by = fields.ToOneField(UserResource, 'being_edited_by', full=True, null = True)
-    
+    being_edited_by = fields.ToOneField(UserResource, 'being_edited_by', full=True, null=True)
+    experience = fields.ToOneField(BucketExperienceResource, 'experience', full=True, null=True)
+
     def hydrate(self, bundle, request=None):
         # Assign current user to new file
         if not bundle.obj.pk:
             bundle.data['uploaded_by'] = bundle.request.user
-        
+
         return bundle
-        
+
     def prepend_urls(self):
         return [
            url(r"^(?P<resource_name>%s)/bucket/(?P<bucket_id>\d+)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('file_search'), name="api_file_search"),
         ]
-    
+
     def file_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
         self.throttle_check(request)
         self.is_authenticated(request)
 
         # URL params
-        bucket_id = kwargs['bucket_id'] 
+        bucket_id = kwargs['bucket_id']
         # Query params
         query = request.GET.get('q', '')
         autocomplete = request.GET.get('auto', None)
         selected_facets = request.GET.getlist('facet', None)
         order = request.GET.getlist('order', '-pub_date')
-        
+
         sqs = SearchQuerySet().models(BucketFile).filter(bucket=bucket_id).order_by(order).facet('tags')
 
         # 1st narrow down QS
@@ -188,15 +204,13 @@ class BucketFileCommentResource(ModelResource):
         authentication = AnonymousApiKeyAuthentication()
         authorization = DjangoAuthorization()
         filtering = {
-            "bucket_file":'exact', 
+            "bucket_file":'exact',
         }
-        
+
     submitter = fields.ToOneField(UserResource, 'submitter', full=True)
     bucket_file = fields.ToOneField(BucketFileResource, 'bucket_file')
-    
+
     def hydrate(self, bundle, request=None):
         if not bundle.obj.pk:
-            bundle.data['submitter'] = bundle.request.user            
+            bundle.data['submitter'] = bundle.request.user
         return bundle
-
-
