@@ -51,10 +51,10 @@ class BucketFile(models.Model):
     # New fields
     title = models.TextField(null=True, blank=True)             # short string [required]
     type = models.TextField(null=True, blank=True)              # string [required]
-    #  if experience : 'image', 'document', 'video' or 'link'
-    #  if project : 'document', 'link', 'experience'
+    #  if project : 'image', 'document', 'video' or 'link'
+    #  if experience : 'cover', 'document', 'link' or 'experience'
 
-    url = models.TextField(null=True, blank=True)               # string (url)
+    url = models.URLField(null=True, blank=True)               # string (url)
     description = models.TextField(null=True, blank=True)       # long string
 
     # Only for projects

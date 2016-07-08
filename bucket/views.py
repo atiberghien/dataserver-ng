@@ -114,6 +114,7 @@ class ThumbnailView(View):
         try:
             thumbnail = get_thumbnail(target, preview_width or preview_height, quality=80, format='JPEG')
         except Exception:
+            raise
             thumbnail = None
 
         if thumbnail:
@@ -161,9 +162,13 @@ class UploadView(JSONResponseMixin, FormMixin, View):
             if 'id' in request.POST:
                 file_id = qdict['id']
                 self.bf = get_object_or_404(BucketFile, pk=file_id)
-                self.bf.file = file
-                self.bf.being_edited_by = None
-                self.bf.uploaded_by = form.cleaned_data['uploaded_by'] # FIXME : security hole !! should
+                self.bf = BucketFile()
+                if file:
+                    self.bf.filename = wrapped_file.file.name
+                    self.bf.file_size = wrapped_file.file.size
+                    self.bf.file = file
+                self.bf.uploaded_by = form.cleaned_data['uploaded_by'] # FIXME : security hole !!
+                self.bf.bucket = form.cleaned_data['bucket']
                 self.bf.title = form.cleaned_data['title']
                 self.bf.type = form.cleaned_data['type']
                 self.bf.url = form.cleaned_data['url']
@@ -173,20 +178,16 @@ class UploadView(JSONResponseMixin, FormMixin, View):
                 self.bf.is_author = form.cleaned_data['is_author']
                 self.bf.author = form.cleaned_data['author']
                 self.bf.review = form.cleaned_data['review']
-                # raise Exception(request.POST['experience_detail'])
-                try:
+                data_experience = json.loads(request.POST.get('experience_detail', '{}'))
+                if data_experience:
                     exp = Experience(
-                        date=request.POST['experience_detail']['date'],
-                        difficulties=request.POST['experience_detail']['difficulties'],
-                        presentation=request.POST['experience_detail']['presentation'],
-                        success=request.POST['experience_detail']['success']
+                        date=data_experience['date'],
+                        difficulties=data_experience['difficulties'],
+                        presentation=data_experience['presentation'],
+                        success=data_experience['success']
                     )
                     exp.save()
-                except Exception as exc:
-                    raise Exception(request.POST.get('experience_detail').__dict__)
-                self.bf.experience = exp
-                self.bf.save()
-                self.bf.thumbnail_url = reverse('bucket-thumbnail', args=[self.bf.pk])
+                    self.bf.experience = exp
                 self.bf.save()
             # new file
             else:
@@ -206,8 +207,8 @@ class UploadView(JSONResponseMixin, FormMixin, View):
                 self.bf.is_author = form.cleaned_data['is_author']
                 self.bf.author = form.cleaned_data['author']
                 self.bf.review = form.cleaned_data['review']
-                data_experience = json.loads(request.POST.get('experience_detail'))
-                try:
+                data_experience = json.loads(request.POST.get('experience_detail', '{}'))
+                if data_experience:
                     exp = Experience(
                         date=data_experience['date'],
                         difficulties=data_experience['difficulties'],
@@ -215,10 +216,7 @@ class UploadView(JSONResponseMixin, FormMixin, View):
                         success=data_experience['success']
                     )
                     exp.save()
-                except Exception as exc:
-
-                    raise exc
-                self.bf.experience = exp
+                    self.bf.experience = exp
                 self.bf.save()
                 if file:
                     self.bf.thumbnail_url = reverse('bucket-thumbnail', args=[self.bf.pk])
