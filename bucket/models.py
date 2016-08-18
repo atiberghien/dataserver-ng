@@ -29,6 +29,12 @@ class Bucket(models.Model):
     def __unicode__(self):
         return u"Bucket %s with %d objects" % (self.name, len(self.files.all()))
 
+class Experience(models.Model):
+    date = models.TextField(null=True, blank=True)
+    difficulties = models.TextField(null=True, blank=True)
+    presentation = models.TextField(null=True, blank=True)
+    success = models.TextField(null=True, blank=True)
+
 
 class BucketFile(models.Model):
     """
@@ -38,11 +44,28 @@ class BucketFile(models.Model):
     tags = TaggableManager(blank=True)
     uploaded_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
-    description = models.TextField(null=True, blank=True)
     filename = models.CharField(max_length=2048, null=True, blank=True)
     uploaded_by = models.ForeignKey(User, related_name='uploader_of')
-    being_edited_by = models.ForeignKey(User, null=True,
-                                        related_name='editor_of')
+    being_edited_by = models.ForeignKey(User, null=True, related_name='editor_of')
+
+    # New fields
+    title = models.TextField(null=True, blank=True)             # short string [required]
+    type = models.TextField(null=True, blank=True)              # string [required]
+    #  if project : 'image', 'document', 'video' or 'link'
+    #  if experience : 'cover', 'document', 'link' or 'experience'
+
+    url = models.URLField(null=True, blank=True)               # string (url)
+    description = models.TextField(null=True, blank=True)       # long string
+
+    # Only for projects
+    video_id = models.TextField(null=True, blank=True)          # short string [required if type='video']
+    video_provider = models.TextField(null=True, blank=True)    # string 'youtube' ou 'dailymotion' [required if type='video']
+
+    # Only for experiences
+    is_author = models.BooleanField(default=False)              # boolean [required if type=['document', 'link']] // PROBLEME AVEC CE TRUC !!
+    author = models.TextField(null=True, blank=True)            # short string [if None -> 'Auteur inconnu' (only if experience)]
+    review = models.TextField(null=True, blank=True)            # long string
+    experience = models.OneToOneField(Experience, null=True, blank=True)
 
     def __unicode__(self):
         return u"File  %s from bucket %s" % (self.filename, self.bucket.name)
@@ -59,7 +82,7 @@ class BucketFile(models.Model):
         fullname = os.path.join(upload_path, "%s%s" % (hash, ext))
         return fullname
 
-    file = models.FileField(upload_to=_upload_to, max_length=255)
+    file = models.FileField(upload_to=_upload_to, max_length=255, blank=True, null=True)
     thumbnail_url = models.CharField(max_length=2048)
 
 
