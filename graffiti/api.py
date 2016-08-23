@@ -23,7 +23,7 @@ class TagResource(ModelResource):
         resource_name = 'tag'
         filtering = {
             "name": ["exact",],
-            "slug": ["exact",]
+            "slug": ["exact", "icontains"]
         }
         allowed_methods = ['get']
         always_return_data = True
