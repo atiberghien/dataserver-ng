@@ -27,7 +27,7 @@ class Bucket(models.Model):
     name = models.CharField(max_length=200, verbose_name=_("name"))
 
     def __unicode__(self):
-        return u"Bucket %s with %d objects" % (self.name, len(self.files.all()))
+        return u"Bucket %s with %d objects" % (self.name, self.files.count())
 
 class Experience(models.Model):
     date = models.TextField(null=True, blank=True)
@@ -46,7 +46,7 @@ class BucketFile(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
     filename = models.CharField(max_length=2048, null=True, blank=True)
     uploaded_by = models.ForeignKey(User, related_name='uploader_of')
-    being_edited_by = models.ForeignKey(User, null=True, related_name='editor_of')
+    being_edited_by = models.ForeignKey(User, null=True, blank=True,related_name='editor_of')
 
     # New fields
     title = models.TextField(null=True, blank=True)             # short string [required]

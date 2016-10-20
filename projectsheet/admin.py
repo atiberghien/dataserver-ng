@@ -59,7 +59,12 @@ class ProjectSheetQuestionAdmin(admin.ModelAdmin):
 
 
 class ProjectSheetTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'type', 'template_file', 'active')
+    list_editable = ('type', 'template_file', 'active',)
     inlines = [ProjectSheetQuestionInline]
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ProjectSheetAdmin(SimpleHistoryAdmin):

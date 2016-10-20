@@ -54,7 +54,9 @@ class ProjectSheetTemplateResource(ModelResource):
         authorization = DjangoAuthorization()
         always_return_data = True
         filtering = {
-            'slug': ('exact', )
+            'type' : ('exact',),
+            'slug': ('exact', ),
+            'active' : ('exact',)
         }
 
 
@@ -82,6 +84,7 @@ class ProjectSheetHistoryResource(ModelResource):
 class ProjectSheetResource(HistorizedModelResource):
     project = fields.ToOneField(ProjectResource, 'project', full=True)
     template = fields.ToOneField(ProjectSheetTemplateResource, 'template')
+    template_file = fields.CharField(attribute='template__template_file', null=True)
     bucket = fields.ToOneField(BucketResource, 'bucket', null=True, full=True)
     cover = fields.ToOneField(BucketFileResource, 'cover', null=True, full=True)
     question_answers = fields.ToManyField(ProjectSheetQuestionAnswerResource,

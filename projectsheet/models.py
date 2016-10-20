@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.db.models.signals import pre_save , post_delete
 from django.contrib.auth.models import User
@@ -15,6 +16,9 @@ class ProjectSheetTemplate(models.Model):
     name = models.CharField(max_length=100)
     slug = AutoSlugField(unique=True, populate_from="name", always_update=True)
     shortdesc = models.CharField(max_length=255, null=True, blank=True)
+    template_file = models.CharField(max_length=255, null=True, blank=True, choices=settings.PROJECTSHEET_TEMPLATE_FILES)
+    active = models.BooleanField(default=False)
+    type = models.CharField(max_length=2, choices=settings.PROJECTSHEET_TEMPLATE_TYPES)
 
     def __unicode__(self):
         return self.name
