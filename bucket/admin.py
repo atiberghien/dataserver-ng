@@ -6,6 +6,8 @@ class InlineBucketFile(admin.TabularInline):
     model = BucketFile
 
 class BucketAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_by')
+    search_fields = ('name', )
     inlines = [
         InlineBucketFile,
     ]

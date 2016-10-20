@@ -63,6 +63,9 @@ class ProjectSheetTemplateAdmin(admin.ModelAdmin):
 
 
 class ProjectSheetAdmin(SimpleHistoryAdmin):
+    list_display = ('project', 'template')
+    search_fields = ('project__title', )
+    list_editable = ('template', )
     inlines = [ProjectSheetQuestionAnswerInline]
 
 
