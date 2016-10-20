@@ -51,14 +51,17 @@ class UserResource(ModelResource):
     # groups = fields.ToManyField('accounts.api.GroupResource', 'groups', null=True, full=False)
 
     def dehydrate(self, bundle):
-        try:
-            bundle.data['profile'] = {
-                'avatar' : bundle.obj.profile.mugshot.url,
-                'id' : bundle.obj.profile.id
-            }
-            bundle.data['groups'] = [{"id" : group.id, "name":group.name} for group in bundle.obj.groups.all()]
-        except:
-            pass
+        if bundle.request.user.is_anonymous():
+            del bundle.data['email']
+        else:
+            try:
+                bundle.data['profile'] = {
+                    'avatar' : bundle.obj.profile.mugshot.url,
+                    'id' : bundle.obj.profile.id
+                }
+                bundle.data['groups'] = [{"id" : group.id, "name":group.name} for group in bundle.obj.groups.all()]
+            except:
+                pass
         return bundle
 
     def obj_create(self, bundle, request=None, **kwargs):
