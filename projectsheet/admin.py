@@ -50,7 +50,7 @@ class ProjectSheetQuestionInline(EditLinkToInlineObject, StackedInline):
 
 
 class ProjectSheetQuestionAdmin(admin.ModelAdmin):
-    inlines = [QuestionChoiceInline]
+    # inlines = [QuestionChoiceInline]
     list_display = [ 'id', 'related_template', '__unicode__']
 
     def related_template(self, obj):
