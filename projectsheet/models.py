@@ -19,6 +19,10 @@ class ProjectSheetTemplate(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Gabarit de fiche"
+        verbose_name_plural = "Gabarits de fiche"
+
 
 class ProjectSheetQuestion(models.Model):
     template = models.ForeignKey(ProjectSheetTemplate, related_name='questions')
@@ -61,6 +65,11 @@ class ProjectSheet(models.Model):
 
     def __unicode__(self):
         return u"%s %s" % (_('Project sheet for '), self.project)
+
+    class Meta:
+        verbose_name = "Fiche"
+        verbose_name_plural = "Fiches"
+
 
 def createProjectSheetBucket(sender, instance, **kwargs):
     if instance.bucket == None:
