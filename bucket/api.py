@@ -19,7 +19,7 @@ from tastypie import fields
 from dataserver.authorization import GuardianAuthorization
 from dataserver.authentication import AnonymousApiKeyAuthentication
 
-from .models import Bucket, BucketFile, BucketFileComment, Experience
+from .models import Bucket, BucketFile, Experience
 
 class BucketResource(ModelResource):
     class Meta:
@@ -126,7 +126,6 @@ class BucketFileResource(ModelResource):
         authentication = AnonymousApiKeyAuthentication()
         authorization = DjangoAuthorization()
 
-    comments = fields.ToManyField('bucket.api.BucketFileCommentResource', 'comments', full=True)
     tags = fields.ToManyField(BucketTagResource, 'tags', full=True)
     bucket = fields.ToOneField(BucketResource, 'bucket', null=True)
     uploaded_by = fields.ToOneField(UserResource, 'uploaded_by', full=True)
@@ -176,12 +175,12 @@ class BucketFileResource(ModelResource):
             object_list = {
                 'objects': tags,
             }
-            
+
         # B: else, we return a list of files
         else:
             if query != "":
                 sqs = sqs.auto_query(query)
-            
+
             objects = []
             # Building object list
             for result in sqs:
@@ -195,22 +194,3 @@ class BucketFileResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
-        
-class BucketFileCommentResource(ModelResource):
-    class Meta:
-        queryset = BucketFileComment.objects.all()
-        always_return_data = True
-        resource_name = 'bucket/filecomment'
-        authentication = AnonymousApiKeyAuthentication()
-        authorization = DjangoAuthorization()
-        filtering = {
-            "bucket_file":'exact',
-        }
-
-    submitter = fields.ToOneField(UserResource, 'submitter', full=True)
-    bucket_file = fields.ToOneField(BucketFileResource, 'bucket_file')
-
-    def hydrate(self, bundle, request=None):
-        if not bundle.obj.pk:
-            bundle.data['submitter'] = bundle.request.user
-        return bundle

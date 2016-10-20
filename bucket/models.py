@@ -85,22 +85,6 @@ class BucketFile(models.Model):
     file = models.FileField(upload_to=_upload_to, max_length=255, blank=True, null=True)
     thumbnail_url = models.CharField(max_length=2048)
 
-
-class BucketFileComment(models.Model):
-    """
-    A comment on a file
-    """
-    bucket_file = models.ForeignKey(BucketFile, related_name='comments')
-    submitter = models.ForeignKey(User)
-    submitted_on = models.DateTimeField(auto_now_add=True)
-    text = models.TextField()
-
-
-    def __unicode__(self):
-        return "%s on %s (%s)" % (self.text,
-                                  self.bucket_file,
-                                  self.submitter)
-
 @receiver(post_save, sender=Bucket)
 def allow_user_to_edit_buckets(sender, instance, created, *args, **kwargs):
     assign_perm("view_bucket", user_or_group=instance.created_by, obj=instance)

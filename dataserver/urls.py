@@ -6,7 +6,7 @@ from django.contrib import admin
 from tastypie.api import Api
 
 from accounts.api import UserResource, GroupResource, ProfileResource, ObjectProfileLinkResource
-from bucket.api import BucketResource, BucketFileResource, BucketTagResource, BucketFileCommentResource
+from bucket.api import BucketResource, BucketFileResource, BucketTagResource
 from flipflop.api import BoardResource, ListResource, CardResource, TaskResource, LabelResource, CardCommentResource
 from graffiti.api import TagResource, TaggedItemResource
 from projects.api import ProjectResource
@@ -49,7 +49,6 @@ api.register(LabelResource())
 api.register(BucketResource())
 api.register(BucketTagResource())
 api.register(BucketFileResource())
-api.register(BucketFileCommentResource())
 
 # Projects
 api.register(ProjectResource())
