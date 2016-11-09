@@ -11,6 +11,7 @@ class InlineDataLayerAdmin(admin.StackedInline):
     model = DataLayer
     extra = 1
 
+
 class MapAdmin(GuardedModelAdmin):
     inlines = [
         InlineMarkerCategory,
@@ -26,12 +27,18 @@ class MarkerAdmin(admin.ModelAdmin):
 class MarkerCategoryAdmin(admin.ModelAdmin):
     pass
 
+class InlinePlaceAdmin(admin.StackedInline):
+    model = Place
+    extra = 0
+
 class PostalAddressAdmin(admin.ModelAdmin):
-    pass
+    inlines = [
+        InlinePlaceAdmin
+    ]
 
 
-admin.site.register(Map, MapAdmin)
-admin.site.register(TileLayer, TileLayerAdmin)
-admin.site.register(Marker, MarkerAdmin)
+# admin.site.register(Map, MapAdmin)
+# admin.site.register(TileLayer, TileLayerAdmin)
+# admin.site.register(Marker, MarkerAdmin)
 admin.site.register(PostalAddress)
 admin.site.register(Place)

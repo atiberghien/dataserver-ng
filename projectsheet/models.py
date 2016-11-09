@@ -24,8 +24,8 @@ class ProjectSheetTemplate(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = "Gabarit de fiche"
-        verbose_name_plural = "Gabarits de fiche"
+        verbose_name = "gabarit de fiche"
+        verbose_name_plural = "gabarits de fiche"
 
 
 class ProjectSheetQuestion(models.Model):
@@ -38,6 +38,8 @@ class ProjectSheetQuestion(models.Model):
 
     class Meta:
         ordering = ('order',)
+        verbose_name = "question de gabarit"
+        verbose_name_plural = "questions de gabarit"
 
 
 class QuestionChoice(models.Model):
@@ -71,8 +73,8 @@ class ProjectSheet(models.Model):
         return u"%s %s" % (_('Project sheet for '), self.project)
 
     class Meta:
-        verbose_name = "Fiche"
-        verbose_name_plural = "Fiches"
+        verbose_name = "fiche"
+        verbose_name_plural = "fiches"
 
 
 def createProjectSheetBucket(sender, instance, **kwargs):
