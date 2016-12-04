@@ -340,6 +340,7 @@ class ProfileResource(ModelResource):
             "id" : ['exact',],
             "user" : ALL_WITH_RELATIONS,
         }
+        excludes = ('mugshot', 'privacy')
 
     def dehydrate(self, bundle):
         bundle.data["username"] = bundle.obj.username
@@ -433,6 +434,9 @@ class ObjectProfileLinkResource(ModelResource):
             profiles = Profile.objects.filter(id__gt=1,
                         objectprofilelink__content_type__model=kwargs["content_type"],
                         objectprofilelink__level__in=levels).annotate(score=Count('objectprofilelink')).order_by('-score')
+
+            if 'limit' in request.GET:
+                profiles = profiles[:request.GET.get('limit')]
 
             bundles = []
             for obj in profiles:

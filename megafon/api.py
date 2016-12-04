@@ -4,7 +4,7 @@ from tastypie.resources import ModelResource
 from tastypie import fields
 
 from .models import Post
-from accounts.models import Profile
+from accounts.models import Profile, ObjectProfileLink
 
 from graffiti.api import TaggedItemResource
 from dataserver.authentication import AnonymousApiKeyAuthentication
@@ -39,6 +39,28 @@ class PostResource(ModelResource):
             "answers_count" : ('exact', ),
         }
         ordering = ['updated_on', 'answers_count']
+
+    def dehydrate(self, bundle):
+        try:
+            o = ObjectProfileLink.objects.get(content_type__model="post", object_id=bundle.obj.id, level=30)
+            author_resource = ProfileResource()
+            author_bundle = author_resource.build_bundle(obj=o.profile, request=bundle.request)
+            bundle.data["author"] = author_resource.full_dehydrate(author_bundle)
+        except ObjectProfileLink.DoesNotExist:
+            pass
+        try:
+            o_list = ObjectProfileLink.objects.filter(content_type__model="post", object_id=bundle.obj.id, level=31)
+            bundle.data["contributors"] = []
+            for o in o_list:
+                contributor_resource = ProfileResource()
+                contributor_bundle = contributor_resource.build_bundle(obj=o.profile, request=bundle.request)
+                bundle.data["contributors"].append(contributor_resource.full_dehydrate(author_bundle))
+        except:
+            pass
+        # author_resource = ProfileResource()
+        # author_bundle = author_resource.build_bundle(obj=o.profile, request=bundle.request)
+        # bundle.data["author"] = author_resource.full_dehydrate(author_bundle)
+        return bundle
 
     def prepend_urls(self):
         return [
