@@ -54,7 +54,7 @@ class PostResource(ModelResource):
             for o in o_list:
                 contributor_resource = ProfileResource()
                 contributor_bundle = contributor_resource.build_bundle(obj=o.profile, request=bundle.request)
-                bundle.data["contributors"].append(contributor_resource.full_dehydrate(author_bundle))
+                bundle.data["contributors"].append(contributor_resource.full_dehydrate(contributor_bundle))
         except:
             pass
         # author_resource = ProfileResource()
